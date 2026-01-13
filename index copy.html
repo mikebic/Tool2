@@ -1,0 +1,736 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Army 8140 Readiness Management Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Basic reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Arial", "Helvetica", sans-serif;
+    }
+
+    body {
+      background-color: #111;
+      color: #f5f5f5;
+    }
+
+    a {
+      color: #c5d5ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Top banner */
+    .top-bar {
+      background-color: #000;
+      padding: 8px 20px;
+      border-bottom: 3px solid #b38f00; /* gold accent */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .army-seal {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f5f5f5 0, #f5f5f5 20%, #555 60%, #000 100%);
+      border: 2px solid #b38f00;
+    }
+
+    .top-bar-title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar-title span:first-child {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #cccccc;
+    }
+
+    .top-bar-title span:last-child {
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      color: #f5f5f5;
+    }
+
+    .top-bar-right {
+      font-size: 12px;
+      text-align: right;
+      color: #cccccc;
+    }
+
+    /* Main layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background-color: #1b1b1b;
+      border-right: 1px solid #333;
+      padding: 16px 10px;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #999;
+      margin: 10px 6px 4px;
+      letter-spacing: 1px;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 8px 10px;
+      margin: 2px 0;
+      font-size: 13px;
+      color: #e0e0e0;
+      border-radius: 3px;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, #b38f00 0, #806600 100%);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .nav-item:hover {
+      background-color: #333;
+    }
+
+    /* Main content */
+    .main {
+      padding: 18px 24px 24px;
+      background-color: #141414;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 12px;
+      color: #bbbbbb;
+      margin-bottom: 16px;
+    }
+
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+      font-size: 12px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-group label {
+      color: #cccccc;
+    }
+
+    .filter-group select {
+      background-color: #1f1f1f;
+      border: 1px solid #444;
+      color: #f5f5f5;
+      padding: 4px 6px;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+
+    /* Grid areas */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr;
+      grid-auto-rows: minmax(0, auto);
+      gap: 14px;
+    }
+
+    .card {
+      background-color: #1b1b1b;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 10px 12px 12px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #dddddd;
+    }
+
+    .card-subtitle {
+      font-size: 11px;
+      color: #888888;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid #555;
+      color: #cccccc;
+    }
+
+    .status-badge-green {
+      border-color: #3ba55c;
+      color: #a6f0b3;
+    }
+
+    .status-badge-amber {
+      border-color: #b38f00;
+      color: #ffe58a;
+    }
+
+    .status-badge-red {
+      border-color: #cc4444;
+      color: #ffaaaa;
+    }
+
+    /* Metric tiles */
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .metric-tile {
+      background-color: #222;
+      border-radius: 3px;
+      padding: 8px;
+      border: 1px solid #333;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: #bbbbbb;
+      margin-bottom: 2px;
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .metric-note {
+      font-size: 10px;
+      color: #888888;
+      margin-top: 2px;
+    }
+
+    .metric-good {
+      color: #68d391;
+    }
+
+    .metric-warn {
+      color: #f6e05e;
+    }
+
+    .metric-bad {
+      color: #fc8181;
+    }
+
+    /* Simple lists/tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    th, td {
+      padding: 4px 3px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+
+    th {
+      color: #bbbbbb;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #202020;
+    }
+
+    .pill {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid #555;
+      display: inline-block;
+    }
+
+    .pill-green {
+      border-color: #3ba55c;
+      color: #a6f0b3;
+    }
+
+    .pill-amber {
+      border-color: #b38f00;
+      color: #ffe58a;
+    }
+
+    .pill-red {
+      border-color: #cc4444;
+      color: #ffaaaa;
+    }
+
+    .pill-blue {
+      border-color: #3b82f6;
+      color: #bfdbfe;
+    }
+
+    /* Checklist / steps */
+    .checklist {
+      list-style: none;
+      font-size: 11px;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .check-icon {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid #666;
+      margin-top: 2px;
+    }
+
+    .check-icon-complete {
+      background: linear-gradient(135deg, #3ba55c, #22543d);
+      border-color: #88f2aa;
+    }
+
+    .check-icon-partial {
+      background: linear-gradient(135deg, #b38f00, #744210);
+      border-color: #ffe58a;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 14px;
+      font-size: 10px;
+      color: #777777;
+      border-top: 1px solid #333;
+      padding-top: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .metric-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top banner -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="army-seal"></div>
+      <div class="top-bar-title">
+        <span>Headquarters, Department of the Army</span>
+        <span>Army 8140 Readiness Management Dashboard</span>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <div>UNCLASSIFIED // FOUO</div>
+      <div>Prototype Interface &mdash; Not For Operational Use</div>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="layout">
+    <!-- Sidebar nav -->
+    <aside class="sidebar">
+      <div class="sidebar-section-title">Navigation</div>
+      <a href="#" class="nav-item active">Brigade Dashboard</a>
+      <a href="#" class="nav-item">Unit-Level View</a>
+      <a href="#" class="nav-item">Soldier-Level View</a>
+      <a href="#" class="nav-item">Mentorship Management</a>
+      <a href="#" class="nav-item">Resource & Voucher Planning</a>
+      <a href="#" class="nav-item">Policy & SOP Library</a>
+      <a href="#" class="nav-item">Reports & Exports</a>
+
+      <div class="sidebar-section-title">Filters</div>
+      <a href="#" class="nav-item">Component / Command</a>
+      <a href="#" class="nav-item">MOS / Cyber Role</a>
+      <a href="#" class="nav-item">Certification Type</a>
+      <a href="#" class="nav-item">Readiness Risk Flags</a>
+
+      <div class="sidebar-section-title">Admin</div>
+      <a href="#" class="nav-item">User & Role Management</a>
+      <a href="#" class="nav-item">System Configuration</a>
+      <a href="#" class="nav-item">Audit & Compliance</a>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      <div class="page-title">Brigade 8140 Implementation & Proficiency Overview</div>
+      <div class="page-subtitle">
+        Standardized view of certification status, proficiency indicators, mentorship coverage, and resource utilization across subordinate units.
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label for="f_br">Brigade:</label>
+          <select id="f_br">
+            <option>97th Training Brigade </option>
+            <option>XX Cyber Protection Brigade</option>
+            <option>All Brigades</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="f_comp">Component:</label>
+          <select id="f_comp">
+            <option>USAR</option>
+            <option>ARNG</option>
+            <option>Active Component</option>
+            <option>All Components</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="f_mos">Cyber Role:</label>
+          <select id="f_mos">
+            <option>All Roles</option>
+            <option>Systems Manager</option>
+            <option>System Administrator</option>
+            <option>Cyber Defensive Ops</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="f_risk">Risk:</label>
+          <select id="f_risk">
+            <option>All</option>
+            <option>High Risk Units</option>
+            <option>Moderate Risk Units</option>
+            <option>On-Track Units</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dashboard grid -->
+      <div class="dashboard-grid">
+        <!-- Left side: metrics + checklist + units -->
+        <section>
+          <!-- Top-level metrics -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Key Readiness Metrics</div>
+                <div class="card-subtitle">8140 alignment, proficiency indicators, and implementation status</div>
+              </div>
+              <span class="status-badge status-badge-amber">Brigade Status: At Risk</span>
+            </div>
+
+            <div class="metric-row">
+              <div class="metric-tile">
+                <div class="metric-label">Personnel 8140-Compliant</div>
+                <div class="metric-value metric-warn">63%</div>
+                <div class="metric-note">Target: 80% by Q4</div>
+              </div>
+              <div class="metric-tile">
+                <div class="metric-label">Mission-Ready (Certification + Proficiency)</div>
+                <div class="metric-value metric-bad">42%</div>
+                <div class="metric-note">Composite: Cert + OJT + Mentor</div>
+              </div>
+              <div class="metric-tile">
+                <div class="metric-label">Average Time-to-Certification</div>
+                <div class="metric-value metric-warn">7.3 mo</div>
+                <div class="metric-note">Target: &lt; 6 months</div>
+              </div>
+              <div class="metric-tile">
+                <div class="metric-label">Mentorship Coverage</div>
+                <div class="metric-value metric-good">78%</div>
+                <div class="metric-note">With assigned mentor</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Implementation checklist -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Standardized 8140 Implementation Checklist</div>
+                <div class="card-subtitle">Brigade-level completion status</div>
+              </div>
+              <span class="status-badge status-badge-amber">Phase 2 of 3</span>
+            </div>
+
+            <ul class="checklist">
+              <li>
+                <div class="check-icon check-icon-complete"></div>
+                <div>
+                  <strong>Phase 1 &mdash; Policy & Structure Established</strong><br>
+                  Brigade SOP approved; roles and responsibilities defined; unit implementation POCs identified.
+                </div>
+              </li>
+              <li>
+                <div class="check-icon check-icon-partial"></div>
+                <div>
+                  <strong>Phase 2 &mdash; Tracking & Mentorship Operational</strong><br>
+                  Standardized roster fields, certification status, and mentorship assignment implemented in &gt;= 75% of subordinate units.
+                </div>
+              </li>
+              <li>
+                <div class="check-icon"></div>
+                <div>
+                  <strong>Phase 3 &mdash; Proficiency Verification & Continuous Improvement</strong><br>
+                  Scenario-based proficiency checks, after-action reviews, and feedback loops integrated into routine training events.
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Unit status table -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Unit-Level Status</div>
+                <div class="card-subtitle">Roll-up of key indicators by battalion / company</div>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Unit</th>
+                  <th>8140 Compliance</th>
+                  <th>Mission-Ready</th>
+                  <th>Mentorship Coverage</th>
+                  <th>Tracking Maturity</th>
+                  <th>Overall Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1-XX Battalion</td>
+                  <td>74%</td>
+                  <td>51%</td>
+                  <td>92%</td>
+                  <td><span class="pill pill-green">Standardized</span></td>
+                  <td><span class="pill pill-amber">Moderate</span></td>
+                </tr>
+                <tr>
+                  <td>2-XX  Battalion</td>
+                  <td>58%</td>
+                  <td>39%</td>
+                  <td>61%</td>
+                  <td><span class="pill pill-amber">Mixed</span></td>
+                  <td><span class="pill pill-red">High</span></td>
+                </tr>
+                <tr>
+                  <td>3-XX  Battalion</td>
+                  <td>69%</td>
+                  <td>47%</td>
+                  <td>80%</td>
+                  <td><span class="pill pill-amber">Emerging</span></td>
+                  <td><span class="pill pill-amber">Moderate</span></td>
+                </tr>
+                <tr>
+                  <td>BN HQ & Staff Sections</td>
+                  <td>82%</td>
+                  <td>63%</td>
+                  <td>100%</td>
+                  <td><span class="pill pill-green">Standardized</span></td>
+                  <td><span class="pill pill-green">Low</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Right side: mentorship, resources, policy -->
+        <section>
+          <!-- Mentorship module -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Mentorship & Proficiency Progression</div>
+                <div class="card-subtitle">Coverage, activity, and impact indicators</div>
+              </div>
+              <span class="status-badge status-badge-green">On Track</span>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Personnel with assigned mentor</td>
+                  <td>78%</td>
+                  <td>Goal: &gt;= 80% of certification candidates</td>
+                </tr>
+                <tr>
+                  <td>Active mentorship relationships</td>
+                  <td>126</td>
+                  <td>Avg. 2 sessions / month</td>
+                </tr>
+                <tr>
+                  <td>Mentored vs. non-mentored time-to-cert</td>
+                  <td>6.1 mo vs. 8.4 mo</td>
+                  <td>Mentored personnel achieve readiness faster</td>
+                </tr>
+                <tr>
+                  <td>Mentor sign-off on proficiency</td>
+                  <td>61%</td>
+                  <td>Includes scenario-based validation</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Resource & voucher module -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Resource & Voucher Utilization</div>
+                <div class="card-subtitle">Funding, vouchers, and study time allocation</div>
+              </div>
+              <span class="status-badge status-badge-amber">Constrained</span>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Allocated</th>
+                  <th>Used</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Exam vouchers (FY)</td>
+                  <td>240</td>
+                  <td>184</td>
+                  <td><span class="pill pill-amber">Limited Remaining</span></td>
+                </tr>
+                <tr>
+                  <td>Formal course seats</td>
+                  <td>96</td>
+                  <td>71</td>
+                  <td><span class="pill pill-amber">Scheduling Gaps</span></td>
+                </tr>
+                <tr>
+                  <td>Authorized study days</td>
+                  <td>1,200</td>
+                  <td>734</td>
+                  <td><span class="pill pill-red">Under-Utilized</span></td>
+                </tr>
+                <tr>
+                  <td>Local/online training licenses</td>
+                  <td>150</td>
+                  <td>143</td>
+                  <td><span class="pill pill-green">Near Full Use</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Policy & alerts -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Policy Alignment & Alerts</div>
+                <div class="card-subtitle">Key requirements and current gaps</div>
+              </div>
+              <span class="status-badge status-badge-red">Attention Required</span>
+            </div>
+
+            <ul class="checklist">
+              <li>
+                <div class="check-icon check-icon-complete"></div>
+                <div>
+                  Brigade 8140 Implementation SOP published and acknowledged by subordinate units.
+                </div>
+              </li>
+              <li>
+                <div class="check-icon check-icon-partial"></div>
+                <div>
+                  Standardized tracking fields (cert status, role, mentor, proficiency check) implemented across all units; validation in progress.
+                </div>
+              </li>
+              <li>
+                <div class="check-icon"></div>
+                <div>
+                  Formal brigade policy defining minimum experiential and scenario-based requirements for "mission ready" status completed and enforced.
+                </div>
+              </li>
+              <li>
+                <div class="check-icon"></div>
+                <div>
+                  Quarterly brigade-level review linking certification, proficiency, and mission performance outcomes documented and submitted to higher headquarters.
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer">
+        Prototype interface developed for conceptual demonstration of an Army-wide 8140 implementation and proficiency management tool.  
+        Not connected to live personnel or readiness systems.  
+        Layout and field structure intended to be scalable across brigades and components.[web:492][web:484]
+      </div>
+    </main>
+  </div>
+</body>
+</html>
